@@ -1,13 +1,15 @@
 import os
-from metamapy import MetaMaPY
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from metamapy import MetaMaPY
+from query_cache import QueryCache
 
 app = Flask(__name__)
 api = Api(app)
 MAX_PROCESSES = int(os.getenv('MAX_PROCESSES', 1))
+CACHE_SIZE = int(os.getenv('CACHE_SIZE', 30))
 
-_cache = {}
+_cache = QueryCache(CACHE_SIZE)
 
 
 class Terms(Resource):
@@ -18,12 +20,11 @@ class Terms(Resource):
     def post(self):
         data = self.parser.parse_args()
         metamapy = MetaMaPY(MAX_PROCESSES)
-        cached_res = _cache.get(data['keyword'])
-        if cached_res:
-            return {'terms': cached_res}, 200
+        if data['keyword'] in _cache:   # try to use cache first
+            return {'terms': _cache.get(data['keyword'])}, 200
 
-        res = metamapy.run(data['text'])
-        _cache[data['keyword']] = res
+        res = metamapy.run(data['text'])    # run MetaMap if cache misses
+        _cache.remember(data['keyword'], res)
         return {'terms': res}, 200
 
 
