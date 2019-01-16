@@ -5,8 +5,6 @@ import logging
 from typing import List
 from concurrent.futures import ProcessPoolExecutor
 
-# configure logger
-logging.basicConfig(format='%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s', level=logging.INFO)
 logger = logging.getLogger('MetaMaPY')
 
 
@@ -74,7 +72,7 @@ class MetaMaPY:
         :param command_line: the command to execute
         :return: terminal output
         """
-        logger.info(f'executing command: $ {command_line}')
+        logger.debug(f'executing command: $ {command_line}')
         return os.popen(command_line).read()
 
     @classmethod
@@ -87,12 +85,12 @@ class MetaMaPY:
         :return: None
         """
         commands = f"metamap -I -p -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
-        logger.info(cls.run_command(commands))
+        logger.debug(cls.run_command(commands))
 
     def run(self, text: str):
         start_time = time.time()
         if not os.path.exists('./out'):
-            logger.info('creating output folder.')
+            logger.debug('creating output folder.')
             os.makedirs('./out')
 
         # step 1: parse the input text, split them into several files evenly
@@ -114,7 +112,7 @@ class MetaMaPY:
             file.write('\n')  # metamap needs a new line at EOF
             file.close()
 
-        logger.info(f'{len(temp_files)} temp files created.')
+        logger.debug(f'{len(temp_files)} temp files created.')
         pre_parse = time.time()
 
         # step 2: run metamap on those files using as much processors as possible in parallel
@@ -158,7 +156,7 @@ class MetaMaPY:
                 'name': v['name'],
                 'score': v['score'],
             })
-        logger.info('removing temp files.')
+        logger.debug('removing temp files.')
         command = 'rm ./out/*.tmp*'  # remove all tmp files
         self.run_command(command)
         post_parse = time.time()
