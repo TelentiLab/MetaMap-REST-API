@@ -84,7 +84,7 @@ class MetaMaPY:
         :param configs: the sts to restrict to, use default in common case
         :return: None
         """
-        commands = f"metamap -I -p -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
+        commands = f"metamap -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
         logger.debug(cls.run_command(commands))
 
     def run(self, text: str):
