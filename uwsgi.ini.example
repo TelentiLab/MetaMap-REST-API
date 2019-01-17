@@ -2,7 +2,7 @@
 base = /var/www/metamapy
 module = app:app
 
-home = %(base)/virtualenvs/metamapy-2ZJOpI9l
+home = <path to virtualenv>
 
 pythonpath = %(base)
 
