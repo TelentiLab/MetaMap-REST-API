@@ -9,6 +9,11 @@ logger = logging.getLogger('MetaMaPY')
 
 
 class MetaMaPY:
+    _METAMAP_PATH = os.getenv('METAMAP_PATH', 'metamap')
+    _PROJECT_PATH = os.getenv('PROJECT_PATH', './')
+    logger.debug(f'setting metamap path: {_METAMAP_PATH}')
+    logger.debug(f'setting project path: {_PROJECT_PATH}')
+
     def __init__(self, max_processes: int):
         self.max_processes = max_processes
 
@@ -84,14 +89,14 @@ class MetaMaPY:
         :param configs: the sts to restrict to, use default in common case
         :return: None
         """
-        commands = f"metamap -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
+        commands = f"{cls._METAMAP_PATH} -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
         logger.debug(cls.run_command(commands))
 
     def run(self, text: str):
         start_time = time.time()
-        if not os.path.exists('./out'):
+        if not os.path.exists(f'{self._PROJECT_PATH}/out'):
             logger.debug('creating output folder.')
-            os.makedirs('./out')
+            os.makedirs(f'{self._PROJECT_PATH}/out')
 
         # step 1: parse the input text, split them into several files evenly
         logger.info('start pre-parsing.')
@@ -102,7 +107,7 @@ class MetaMaPY:
 
         logger.info(f'{self.max_processes} cores available, {min(len(sentences), self.max_processes)} used.')
         for i in range(min(len(sentences), self.max_processes)):  # create a list of temp files
-            filenames.append(f'./out/input{i}.tmp')
+            filenames.append(f'{self._PROJECT_PATH}/out/input{i}.tmp')
             temp_files.append(open(filenames[i], 'a'))
 
         for i, sentence in enumerate(sentences):
@@ -135,8 +140,8 @@ class MetaMaPY:
         - split with | and retrieve column 3,4,5 (score, name, ID)
         - write to file
         """
-        _result_filename = './out/result.txt'
-        command = f"grep '^\d*|MMI|' ./out/*.res | cut -d '|' -f 3,4,5 > {_result_filename}"
+        _result_filename = f'{self._PROJECT_PATH}/out/result.txt'
+        command = f"grep '\d*|MMI|' {self._PROJECT_PATH}/out/*.res | cut -d '|' -f 3,4,5 > {_result_filename}"
         self.run_command(command)
         temp_terms = {}
         with open(_result_filename) as res_file:
@@ -157,7 +162,7 @@ class MetaMaPY:
                 'score': v['score'],
             })
         logger.debug('removing temp files.')
-        command = 'rm ./out/*.tmp*'  # remove all tmp files
+        command = f'rm {self._PROJECT_PATH}/out/*.tmp*'  # remove all tmp files
         self.run_command(command)
         post_parse = time.time()
 
