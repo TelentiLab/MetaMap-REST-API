@@ -10,11 +10,11 @@ socket = %(base)/socket.sock
 
 chmod-socket = 777
 
-processes = 6
+processes = 1
 
 enable-threads = true
 
-harakiri = 60
+harakiri = 120
 
 callable = app
 
