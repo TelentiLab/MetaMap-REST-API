@@ -99,7 +99,7 @@ class MetaMaPY:
             os.makedirs(f'{self._PROJECT_PATH}/out')
 
         # step 1: parse the input text, split them into several files evenly
-        logger.info('start pre-parsing.')
+        logger.debug('start pre-parsing.')
         ascii_text = self.remove_non_ascii(text)
         sentences = self.split_into_sentences(ascii_text)
         filenames = []
@@ -121,7 +121,7 @@ class MetaMaPY:
         pre_parse = time.time()
 
         # step 2: run metamap on those files using as much processors as possible in parallel
-        logger.info('pre-parsing finished, start MetaMap')
+        logger.debug('pre-parsing finished, start MetaMap')
         temp_results = []
         with ProcessPoolExecutor(max_workers=self.max_processes) as pool:
             logger.info(f'dispatching jobs to {self.max_processes} cores')
@@ -133,7 +133,7 @@ class MetaMaPY:
         metamap_time = time.time()
 
         # step 3: parse metamap results
-        logger.info('MetaMap finished, start parsing result')
+        logger.debug('MetaMap finished, start parsing result')
         """
         command explanation:
         - select lines starting with <numbers>|MMI|
