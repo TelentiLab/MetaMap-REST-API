@@ -3,3 +3,4 @@
 /out
 .env
 uwsgi.ini
+/log/*
