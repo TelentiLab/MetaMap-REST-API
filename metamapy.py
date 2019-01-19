@@ -2,7 +2,7 @@ import os
 import time
 import re
 import logging
-from typing import List
+from typing import List, Dict
 from concurrent.futures import ProcessPoolExecutor
 
 logger = logging.getLogger('MetaMaPY')
@@ -71,7 +71,7 @@ class MetaMaPY:
         return "".join(c for c in s if ord(c) < 128)
 
     @classmethod
-    def run_command(cls, command_line: str) -> str:
+    def _run_command(cls, command_line: str) -> str:
         """
         execute a bash command
         :param command_line: the command to execute
@@ -81,7 +81,7 @@ class MetaMaPY:
         return os.popen(command_line).read()
 
     @classmethod
-    def run_metamap(cls, in_file, out_file, configs=('cgab', 'genf', 'lbpr', 'lbtr', 'patf', 'dsyn', 'fndg')):
+    def _run_metamap(cls, in_file, out_file, configs=('cgab', 'genf', 'lbpr', 'lbtr', 'patf', 'dsyn', 'fndg')):
         """
         run MetaMap
         :param in_file: path to input file
@@ -89,10 +89,46 @@ class MetaMaPY:
         :param configs: the sts to restrict to, use default in common case
         :return: None
         """
-        commands = f"{cls._METAMAP_PATH} -N -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
-        logger.debug(cls.run_command(commands))
+        commands = f"{cls._METAMAP_PATH} -I -p -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
+        logger.debug(cls._run_command(commands))
 
-    def run(self, text: str):
+    @classmethod
+    def _parse_result(cls, result_files: List[str]) -> List[Dict]:
+        res = []
+        res_dict = {}
+        for each in result_files:
+            with open(each) as file:
+                for line in file:
+                    if re.search("^Processing", line) or re.search("^Meta Mapping", line):
+                        continue
+                    # MetaMap entry found
+                    try:
+                        cui = re.search("C\d{7}", line).group(0)
+                        category = re.search("\[.*\]", line).group(0)[1:-1]
+                    except AttributeError:
+                        logger.error(f'cannot find cui/category for line: {line}')
+                    else:
+                        preferred_name = re.search("\(.*\)", line)
+                        if preferred_name:
+                            name = preferred_name.group(0)[1:-1]  # get rid of the parenthesis
+                        else:
+                            name = line.split(':', 2)[1].replace(f'[{category}]', '').strip()
+                        if cui in res_dict.keys():
+                            res_dict[cui]['count'] += 1
+                        else:
+                            res_dict[cui] = {
+                                'term': name,
+                                'category': category,
+                                'count': 1,
+                            }
+        for k, v in res_dict.items():
+            v['CUI'] = k    # add cui as a key
+            res.append(v)
+        res.sort(key=lambda x: x['count'], reverse=True)
+        logger.debug(f'parsing finished, result: {res}')
+        return res
+
+    def run(self, text: str) -> List[Dict]:
         start_time = time.time()
         if not os.path.exists(f'{self._PROJECT_PATH}/out'):
             logger.debug('creating output folder.')
@@ -128,42 +164,16 @@ class MetaMaPY:
             for name in filenames:
                 temp_result = f'{name}.res'
                 temp_results.append(temp_result)
-                pool.submit(self.run_metamap, name, temp_result)
+                pool.submit(self._run_metamap, name, temp_result)
 
         metamap_time = time.time()
 
         # step 3: parse metamap results
         logger.debug('MetaMap finished, start parsing result')
-        """
-        command explanation:
-        - select lines starting with <numbers>|MMI|
-        - split with | and retrieve column 3,4,5 (score, name, ID)
-        - write to file
-        """
-        _result_filename = f'{self._PROJECT_PATH}/out/result.txt'
-        command = f"grep '\d*|MMI|' {self._PROJECT_PATH}/out/*.res | cut -d '|' -f 3,4,5 > {_result_filename}"
-        self.run_command(command)
-        temp_terms = {}
-        with open(_result_filename) as res_file:
-            for line in res_file:
-                score, name, _id = line.strip().split('|')
-                if _id in temp_terms.keys():
-                    temp_terms[_id]['score'] += float(score)    # sum up scores for same id
-                else:   # create a new entry
-                    temp_terms[_id] = {
-                        'name': name,
-                        'score': float(score),
-                    }
-        terms = []
-        for k, v in temp_terms.items():
-            terms.append({
-                'id': k,
-                'name': v['name'],
-                'score': v['score'],
-            })
+        terms = self._parse_result(temp_results)
         logger.debug('removing temp files.')
         command = f'rm {self._PROJECT_PATH}/out/*.tmp*'  # remove all tmp files
-        self.run_command(command)
+        self._run_command(command)
         post_parse = time.time()
 
         logger.info(f'pre-parse time: {pre_parse - start_time}')
