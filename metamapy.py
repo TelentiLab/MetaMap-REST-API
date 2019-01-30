@@ -11,8 +11,12 @@ logger = logging.getLogger('MetaMaPY')
 class MetaMaPY:
     _METAMAP_PATH = os.getenv('METAMAP_PATH', 'metamap')
     _PROJECT_PATH = os.getenv('PROJECT_PATH', './')
+    _METAMAP_SEM_TYPES = os.getenv('METAMAP_SEM_TYPES', None)
+    _METAMAP_DATA_SOURCES = os.getenv('METAMAP_DATA_SOURCES', None)
     logger.debug(f'setting metamap path: {_METAMAP_PATH}')
     logger.debug(f'setting project path: {_PROJECT_PATH}')
+    logger.debug(f'configuring metamap sem_types: {_METAMAP_SEM_TYPES}')
+    logger.debug(f'configuring metamap data_sources: {_METAMAP_DATA_SOURCES}')
 
     def __init__(self, max_processes: int):
         self.max_processes = max_processes
@@ -81,16 +85,26 @@ class MetaMaPY:
         return os.popen(command_line).read()
 
     @classmethod
-    def _run_metamap(cls, in_file, out_file, configs=('cgab', 'genf', 'lbpr', 'lbtr', 'patf', 'dsyn', 'fndg')):
+    def _run_metamap(cls, in_file: str, out_file: str, sem_types: List[str] = None,
+                     data_sources: List[str] = None) -> None:
         """
-        run MetaMap
+        run MetaMap with given options.
+
         :param in_file: path to input file
         :param out_file: path to output file
-        :param configs: the sts to restrict to, use default in common case
+        :param sem_types: the semantic types to restrict to, use default in common case
+        :param data_sources: the sources to restrict to, use default in common case
         :return: None
         """
-        commands = f"{cls._METAMAP_PATH} -I -p -K -8 --conj -J {','.join(configs)} -R 'HPO' {in_file} {out_file}"
-        logger.debug(cls._run_command(commands))
+        options = ''
+        if sem_types:
+            options = f" -J {','.join(sem_types)}"
+        if data_sources:
+            options = f"{options} -R {','.join(data_sources)}"
+
+        commands = f"{cls._METAMAP_PATH} -I -p -K -8 --conj{options} {in_file} {out_file}"
+        cls._run_command(commands)
+        logger.debug('a metamap process has finished.')
 
     @classmethod
     def _parse_result(cls, result_files: List[str]) -> List[Dict]:
@@ -129,6 +143,7 @@ class MetaMaPY:
         return res
 
     def run(self, text: str) -> List[Dict]:
+        logger.debug(f'running metamap on input text: {text}')
         start_time = time.time()
         if not os.path.exists(f'{self._PROJECT_PATH}/out'):
             logger.debug('creating output folder.')
@@ -161,10 +176,12 @@ class MetaMaPY:
         temp_results = []
         with ProcessPoolExecutor(max_workers=self.max_processes) as pool:
             logger.info(f'dispatching jobs to {self.max_processes} cores')
+            sem_types = self._METAMAP_SEM_TYPES.split(',') if self._METAMAP_SEM_TYPES else None
+            data_sources = self._METAMAP_DATA_SOURCES.split(',') if self._METAMAP_DATA_SOURCES else None
             for name in filenames:
                 temp_result = f'{name}.res'
                 temp_results.append(temp_result)
-                pool.submit(self._run_metamap, name, temp_result)
+                pool.submit(self._run_metamap, name, temp_result, sem_types, data_sources)
 
         metamap_time = time.time()
 
