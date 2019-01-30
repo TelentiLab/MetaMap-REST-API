@@ -7,6 +7,7 @@ Environment=CACHE_SIZE=100
 Environment=LOGGING_LEVEL=DEBUG
 Environment=METAMAP_PATH=/home/omni/public_mm/bin/metamap
 Environment=PROJECT_PATH=/var/www/metamapy
+Environment=METAMAP_DATA_SOURCES=NCI_CTEP-SDC,RAM,DDB,GO,HGNC,HPO,ICD10CM,OMIM
 ExecStart=/home/omni/.local/share/virtualenvs/metamapy-K46w_3iR/bin/uwsgi --master --emperor /var/www/metamapy/uwsgi.ini --die-on-term --uid omni --gid omni --logto /var/www/metamapy/log/emperor.log
 Restart=always
 KillSignal=SIGQUIT
