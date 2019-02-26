@@ -1,18 +1,31 @@
-import logging
-from typing import List
-
-logger = logging.getLogger('MetaMaPY')
+from typing import List, Union
+from logger import logger
+import os
 
 
 class QueryCache:
     """
-    MRU cache
+    MRU cache using singleton constructor
     """
-    def __init__(self, max_size: int):
-        self.max_size = max_size
-        self._cache = {}    # a dict that uses keyword as key and the result list as value
-        self._mru = []   # head is LRU(Least Recently Used) and tail is MRU
-        logger.info(f'QueryCache created with max_size={self.max_size}')
+    class __QueryCache:
+        def __init__(self):
+            _cache_size = int(os.getenv('CACHE_SIZE', 30))
+            logger.info(f'CACHE_SIZE={_cache_size}')
+            self.max_size = _cache_size
+            self._cache = {}  # a dict that uses RSID as key and the result list as value
+            self._mru = []  # head is LRU(Least Recently Used) and tail is MRU
+            logger.info(f'QueryCache created with max_size={self.max_size}')
+
+    instance = None
+
+    def __init__(self):
+        if not self.instance:
+            self.instance = self.__QueryCache()
+        else:
+            logger.debug(f'Using QueryCache singleton with max_size={self.max_size}')
+
+    def __getattr__(self, name):
+        return getattr(self.instance, name)
 
     def __contains__(self, key: str) -> bool:
         """
@@ -36,12 +49,12 @@ class QueryCache:
                 logger.debug(f'updating MRU cache.')
         else:   # cache is full
             logger.debug(f'cache is full.')
-            self.forget()
+            self._forget()
         self._mru.append(key)  # append to tail of MRU
         self._cache[key] = value     # add to cache
         logger.debug(f'{key} cached.')
 
-    def forget(self):
+    def _forget(self):
         """
         if _cache is not empty, remove LRU element from both _mru and _cache
         """
@@ -52,7 +65,12 @@ class QueryCache:
             self._cache.pop(key, None)
             logger.debug(f'{key} removed from cache.')
 
-    def get(self, key: str) -> List:
+    def get(self, key: str) -> Union[List, None]:
+        """
+        If the key has been cached, return the value and update MRU. If not, return None and do nothing else.
+        :param key:
+        :return:
+        """
         if key in self:
             # update LRU
             self._mru.remove(key)
