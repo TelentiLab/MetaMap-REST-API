@@ -14,9 +14,9 @@ Since MetaMap is a Java based command line tool. We wrapped it with Python and i
 
 For now, the API only contains one endpoint: `/metamap`.
 
-### `/metamap`
+### `/metamap/rsid/<string:rsid>`
 
-One can interact with the `/metamap` endpoint using the POST method with the following header and body:
+One can interact with the `/metamap/rsid/<string:rsid>` endpoint using the POST method with the following header and body:
 
 ```
 method:
@@ -27,8 +27,14 @@ content-type: application/json
 
 body:
 {
-    "text": <your text here>,
-    "keyword": <a keyword for the query>
+    "articles": [  // a list of articles
+        {
+            "source": <source name of the article, e.g pubmed>,
+            "id": <id within the source, e.g. PMID>,
+            "text": <the text to process>
+        },
+        ...
+    ]
 }
 ```
 
