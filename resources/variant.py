@@ -1,4 +1,6 @@
 from flask_restful import Resource, reqparse
+
+from libs.omim import get_omim
 from metamapy import MetaMaPY
 from query_cache import QueryCache
 from logger import logger
@@ -39,6 +41,9 @@ class Variant(Resource):
 
             logger.info(f'{rsid} misses cache.')
             metamapy = MetaMaPY(MAX_PROCESSES)
+            omim = get_omim(rsid)
+            if omim:
+                article_list.append(omim)
             res = metamapy.run(article_list)  # run MetaMap if cache misses
             _cache.memorize(rsid, res)
             return {
