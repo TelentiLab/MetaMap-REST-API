@@ -1,11 +1,10 @@
+import os
+import traceback
 from flask_restful import Resource, reqparse
-
 from libs.omim import get_omim
 from metamapy import MetaMaPY
 from query_cache import QueryCache
 from logger import logger
-import os
-import traceback
 
 ERROR_MISSING_ARGS = 'missing argument `{}` in request body.'
 MAX_PROCESSES = int(os.getenv('MAX_PROCESSES', 1))
@@ -31,14 +30,15 @@ class Variant(Resource):
         article_list = data['articles']
         logger.debug(f'request received for {rsid}.')
         try:
-            res = _cache.get(rsid)
-            if res:  # try to use cache first
+            res = _cache.get(rsid)  # try to use cache first
+            if res:  # hit
                 logger.info(f'{rsid} hits cache.')
                 return {
                            'rsid': rsid,
                            'terms': res,
                        }, 200
 
+            # miss
             logger.info(f'{rsid} misses cache.')
             metamapy = MetaMaPY(MAX_PROCESSES)
             omim = get_omim(rsid)
