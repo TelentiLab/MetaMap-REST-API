@@ -1,3 +1,4 @@
+import settings  # load .env files first
 from logger import logger
 from flask import Flask
 from flask_restful import Api
