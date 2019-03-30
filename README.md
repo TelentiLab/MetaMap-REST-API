@@ -12,20 +12,22 @@ Since MetaMap is a Java based command line tool. We wrapped it with Python and i
 
 ## Usage
 
-For now, the API only contains one endpoint: `/metamap`.
+For now, the API contains two endpoints:
 
-### `/metamap/rsid/<string:rsid>`
+### `/metamap/articles`
 
-One can interact with the `/metamap/rsid/<string:rsid>` endpoint using the POST method with the following header and body:
+You may interact with the `/metamap/articles` endpoint using **POST** method with the following header and body:
+
+#### header
 
 ```
-method:
-POST
-
-header:
 content-type: application/json
+```
 
-body:
+#### body
+
+```
+
 {
     "articles": [  // a list of articles
         {
@@ -38,4 +40,30 @@ body:
 }
 ```
 
-We recommend that the keyword be a rsID, since for now the endpoint is meant to serve for **OMNI** with single variant only. 
+### `/metamap/keyword/<string:keyword>`
+
+Querying with only a keyword. The API will try to search OMIM and PubMed for matching articles and run them through MetaMap. 
+
+We recommend that the keyword be an RSID, since we only query OMIM with RSID. But you may use it with any keywords, and we will try to search that keyword on PubMed.
+
+You may interact with the `/metamap/keyword/<string:keyword>` endpoint using **POST** method with the following header and body:
+
+#### header
+
+```
+content-type: application/json
+```
+
+#### body
+
+```
+
+{
+    "use_cache": <true or false>
+}
+```
+
+Notice that the header and body are optional, and must be used together if chosen. This endpoint holds a query cache that stores previous results and will respond immediately if the current keyword hits the cache.
+
+This endpoint uses cache by default. You may pass in the `use_cache` field with `false` in the request body and opt-out using cache.
+ 
