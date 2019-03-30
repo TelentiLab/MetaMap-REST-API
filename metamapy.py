@@ -20,50 +20,6 @@ class MetaMaPY:
         self.max_processes = max_processes
 
     @classmethod
-    def split_into_sentences(cls, text: str) -> List[str]:
-        """
-        split the text into a list of sentences
-        :param text: text input
-        :return: a list of sentences (strings)
-        """
-        _alphabets = "([A-Za-z])"
-        _prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
-        _suffixes = "(Inc|Ltd|Jr|Sr|Co)"
-        _starters = "(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
-        _acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
-        _websites = "[.](com|net|org|io|gov)"
-
-        text = " " + text + "  "
-        text = text.replace("\n", " ")
-        text = re.sub(_prefixes, "\\1<prd>", text)
-        text = re.sub(_websites, "<prd>\\1", text)
-        if "Ph.D" in text:
-            text = text.replace("Ph.D.", "Ph<prd>D<prd>")
-        text = re.sub("\s" + _alphabets + "[.] ", " \\1<prd> ", text)
-        text = re.sub(_acronyms + " " + _starters, "\\1<stop> \\2", text)
-        text = re.sub(_alphabets + "[.]" + _alphabets + "[.]" + _alphabets + "[.]", "\\1<prd>\\2<prd>\\3<prd>", text)
-        text = re.sub(_alphabets + "[.]" + _alphabets + "[.]", "\\1<prd>\\2<prd>", text)
-        text = re.sub(" " + _suffixes + "[.] " + _starters, " \\1<stop> \\2", text)
-        text = re.sub(" " + _suffixes + "[.]", " \\1<prd>", text)
-        text = re.sub(" " + _alphabets + "[.]", " \\1<prd>", text)
-        if "”" in text:
-            text = text.replace(".”", "”.")
-        if "\"" in text:
-            text = text.replace(".\"", "\".")
-        if "!" in text:
-            text = text.replace("!\"", "\"!")
-        if "?" in text:
-            text = text.replace("?\"", "\"?")
-        text = text.replace(".", ".<stop>")
-        text = text.replace("?", "?<stop>")
-        text = text.replace("!", "!<stop>")
-        text = text.replace("<prd>", ".")
-        sentences = text.split("<stop>")
-        sentences = sentences[:-1]
-        sentences = [s.strip() for s in sentences]
-        return sentences
-
-    @classmethod
     def remove_non_ascii(cls, s: str) -> str:
         """
         get rid of non-ASCII characters
