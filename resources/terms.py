@@ -6,8 +6,8 @@ from flask_restful import Resource, reqparse
 from libs.omim import get_omim
 from libs.pubmed import get_pubmed
 from libs.metamapy import MetaMaPY
-from query_cache import QueryCache
-from logger import logger
+from utils.query_cache import QueryCache
+from utils.logger import logger
 
 ERROR_MISSING_ARGS = 'missing argument `{}` in request body.'
 MAX_PROCESSES = int(os.getenv('MAX_PROCESSES', 1))
