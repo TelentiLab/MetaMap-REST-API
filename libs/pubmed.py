@@ -5,7 +5,7 @@ from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 from requests.exceptions import Timeout
 
-from logger import logger
+from utils.logger import logger
 
 """
 Read from env for PUBMED_KEY, PUBMED_TIMEOUT and PUBMED_RET_MAX 

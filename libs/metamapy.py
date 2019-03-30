@@ -1,7 +1,7 @@
 import os
 import time
 import re
-from logger import logger
+from utils.logger import logger
 from typing import List, Dict
 from concurrent.futures import ProcessPoolExecutor
 

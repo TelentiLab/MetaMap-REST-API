@@ -3,7 +3,7 @@ import requests
 from typing import Union, Dict
 from requests.exceptions import Timeout
 
-from logger import logger
+from utils.logger import logger
 
 
 OMIM_URL = 'https://api.omim.org/api/entry/search?search=av_db_snp:{}&include=allelicVariantList&format=json'
