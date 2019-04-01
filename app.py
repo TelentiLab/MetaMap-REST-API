@@ -1,10 +1,10 @@
-import settings
+import settings  # load env before any imports
 from flask import Flask
 from flask_restful import Api
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
-from resources.terms import Article, Keyword
+from resources.terms import Article, SearchTerm
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=1)  # fix x-forwarded-for
@@ -22,7 +22,7 @@ def after_request(response):
 
 
 api.add_resource(Article, '/metamap/articles')
-api.add_resource(Keyword, '/metamap/keyword/<string:keyword>')
+api.add_resource(SearchTerm, '/metamap/term/<string:term>')
 
 if __name__ == '__main__':
     app.run(debug=True)

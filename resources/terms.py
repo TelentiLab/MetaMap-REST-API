@@ -42,33 +42,33 @@ class Article(Resource):
             return {'message': f'An error has occurred, please contact developer.'}, 500
 
 
-class Keyword(Resource):
+class SearchTerm(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('use_cache', type=bool)
 
-    def post(self, keyword: str):
+    def post(self, term: str):
         data = self.parser.parse_args()
         use_cache = data['use_cache']
         if use_cache is None:
             use_cache = True  # default to use cache
-        logger.debug(f'Request received for {keyword}.')
+        logger.debug(f'Request received for {term}.')
         logger.debug(f'use_cache={use_cache}.')
         try:
             if use_cache:
-                res = _cache.get(keyword)  # try to use cache first
+                res = _cache.get(term)  # try to use cache first
                 if res:  # hit
-                    logger.info(f'{keyword} hits cache.')
+                    logger.info(f'{term} hits cache.')
                     return {
-                               'keyword': keyword,
+                               'key': term,
                                'terms': res,
                            }, 200
                 # miss
-                logger.info(f'{keyword} misses cache.')
+                logger.info(f'{term} misses cache.')
 
             pre_fetch = time.time()
             with ProcessPoolExecutor(max_workers=2) as pool:
-                future_omim = pool.submit(get_omim, keyword)
-                future_pubmed = pool.submit(get_pubmed, keyword)
+                future_omim = pool.submit(get_omim, term)
+                future_pubmed = pool.submit(get_pubmed, term)
             post_fetch = time.time()
             logger.info(f'Querying OMIM and Pubmed took {post_fetch - pre_fetch}s.')
             pubmed_result = future_pubmed.result()
@@ -80,14 +80,14 @@ class Keyword(Resource):
 
             metamapy = MetaMaPY(MAX_PROCESSES)
             res = metamapy.run(articles)  # run MetaMap if cache misses
-            _cache.memorize(keyword, res)
+            _cache.memorize(term, res)
             return {
-                       'keyword': keyword,
+                       'key': term,
                        'terms': res,
                    }, 200
         except:
-            logger.error(f'Error occurs while responding request for {keyword}.')
+            logger.error(f'Error occurs while responding request for {term}.')
             logger.error(traceback.format_exc())
             return {
-                       'message': f'An error has occurred while querying MetaMap for {keyword}, please contact developer.'
+                       'message': f'An error has occurred while querying MetaMap for {term}'
                    }, 500
