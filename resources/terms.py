@@ -49,7 +49,6 @@ class Keyword(Resource):
     def post(self, keyword: str):
         data = self.parser.parse_args()
         use_cache = data['use_cache']
-        print(use_cache)
         if use_cache is None:
             use_cache = True  # default to use cache
         logger.debug(f'Request received for {keyword}.')
