@@ -44,13 +44,66 @@ content-type: application/json
 }
 ```
 
-### `/metamap/keyword/<string:keyword>`
+### `/metamap/term/<string:term>`
 
-Querying with only a keyword. The API will try to search OMIM and PubMed for matching articles and run them through MetaMap. 
+Querying with only a search term. The API will try to search OMIM and PubMed for matching articles and run them through MetaMap. 
 
-We recommend that the keyword be an RSID, since we only query OMIM with RSID. But you may use it with any keywords, and we will try to search that keyword on PubMed.
+We recommend that the term be an RSID, since we only query OMIM with RSID. But you may use it with any term, and we will try to search that keyword on PubMed.
 
-You may interact with the `/metamap/keyword/<string:keyword>` endpoint using **POST** method with the following header and body:
+You may interact with the `/metamap/term/<string:term>` endpoint using **POST** method with the following header and body:
+
+#### response
+
+The response will be a json string with field `terms` containing a list of extracted terms. Each extracted term contains 5 fields: 
+
+- `term`: extracted term.
+- `category`: term category.
+- `count`: occurrence.
+- `sources`: source from where the term has been extracted.
+- `CUI`: MetaMap UMLS id.
+
+The `source` sub-field should contain the name of the source, mapped with a list of UIDs in that source. For example:
+
+```
+"sources": {
+    "pubmed": [
+        "30389547"
+    ]
+}
+```
+
+means the term comes from a ***PubMed*** article with PMID 30389547.
+ 
+Sample response:
+
+```json
+{
+    "terms": [
+        {
+            "term": "Multiple Sclerosis",
+            "category": "Disease or Syndrome",
+            "count": 11,
+            "sources": {
+                "pubmed": [
+                    "30389547"
+                ]
+            },
+            "CUI": "C0026769"
+        },
+        {
+            "term": "MS gene",
+            "category": "Gene or Genome",
+            "count": 11,
+            "sources": {
+                "pubmed": [
+                    "30389547"
+                ]
+            },
+            "CUI": "C1417325"
+        }
+    ]
+}
+```
 
 #### header
 
@@ -67,7 +120,18 @@ content-type: application/json
 }
 ```
 
-Notice that the header and body are optional, and must be used together if chosen. This endpoint holds a query cache that stores previous results and will respond immediately if the current keyword hits the cache.
+Notice that the header and body are optional, and must be used together if chosen. This endpoint holds a query cache that stores previous results and will respond immediately if the current term hits the cache.
 
 This endpoint uses cache by default. You may pass in the `use_cache` field with `false` in the request body and opt-out using cache.
  
+#### response
+
+The response body is similar with that of `/metamap/articles` endpoint. Except that there an additional `key` field where key is the term used for the query. This key is used in the cache and future queries with the same key may get immediate response from the cache.
+
+Sample response:
+
+```
+{
+    "key": "rs333",
+    "terms": [...]
+}
