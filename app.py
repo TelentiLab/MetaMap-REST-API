@@ -1,19 +1,17 @@
-from dotenv import load_dotenv
-from pathlib import Path
-from utils.logger import logger
+import settings
 from flask import Flask
 from flask_restful import Api
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 from resources.terms import Article, Keyword
 
-# explicitly providing path to '.env'
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path, verbose=True)
-
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=1)  # fix x-forwarded-for
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["2/second"])
 api = Api(app)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # limit request size to 10MB
 app.config['PROPAGATE_EXCEPTIONS'] = True
-logger.info('app starts.')
 
 
 @app.after_request
