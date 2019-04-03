@@ -16,7 +16,27 @@ One can specify the number of paralleling processes using environment variable `
  
 ## Usage
 
-For now, the API contains two endpoints:
+This section explains how to run the API [locally](#running-locally) and on [remote servers](#running-on-server).
+
+### Running Locally
+
+To run the app locally, you will need to specify some configurations via the environment variables. A common way to do this is to add a `.env` file in the project root folder. An example env file is provided as `.env.example`.
+
+After setting the environment variables in the `.env` file, the app will automatically load them on start.
+
+Notice that you will need a valid OMIM API key to query OMIM data, which can be requested on the OMIM [website](https://omim.org/api). 
+
+And you may need an optional PubMed API key if you wish to have higher rate. The default rate limit is 3 requests per second without an API key. See [E-Utilities reference page](https://www.ncbi.nlm.nih.gov/books/NBK25497/) for more info.
+
+### Running on server
+
+It is recommended to deploy the API onto a server with Nginx and uWSGI. Sample configuration files for uWSGI have been provided. We do not cover the details of using Nginx and uWSGI, but here is a tutorial that can be helpful: [How To Deploy Python App Using uWSGI And Nginx](https://github.com/CristianoYL/Tutorials/blob/master/How%20To%20Deploy%20Python%20App%20Using%20uWSGI%20And%20Nginx.md).
+
+When deploying on server, it is recommended to configure the environment variables in the uWSGI `.service` file, which has been demonstrated in the example file [`uwsgi_metamapy.service.example`](uwsgi_metamapy.service.example).
+
+## API Specifications
+
+Endpoints and its usage have been listed below:
 
 ### `/metamap/articles`
 
