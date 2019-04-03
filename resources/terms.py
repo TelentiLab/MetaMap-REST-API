@@ -42,7 +42,7 @@ class Article(Resource):
             return {'message': f'An error has occurred, please contact developer.'}, 500
 
 
-class SearchTerm(Resource):
+class Term(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('use_cache', type=bool)
 
@@ -58,10 +58,7 @@ class SearchTerm(Resource):
                 res = _cache.get(term)  # try to use cache first
                 if res:  # hit
                     logger.info(f'{term} hits cache.')
-                    return {
-                               'key': term,
-                               'terms': res,
-                           }, 200
+                    return {'terms': res}, 200
                 # miss
                 logger.info(f'{term} misses cache.')
 
@@ -80,14 +77,11 @@ class SearchTerm(Resource):
 
             metamapy = MetaMaPY(MAX_PROCESSES)
             res = metamapy.run(articles)  # run MetaMap if cache misses
+            if len(articles) < 1:
+                return {'message': f'No literature found for {term}'}, 404
             _cache.memorize(term, res)
-            return {
-                       'key': term,
-                       'terms': res,
-                   }, 200
+            return {'terms': res}, 200
         except:
             logger.error(f'Error occurs while responding request for {term}.')
             logger.error(traceback.format_exc())
-            return {
-                       'message': f'An error has occurred while querying MetaMap for {term}'
-                   }, 500
+            return {'message': f'An error has occurred while querying MetaMaPY for {term}'}, 500
