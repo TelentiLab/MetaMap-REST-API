@@ -1,5 +1,5 @@
 from typing import List, Union
-from logger import logger
+from utils.logger import logger
 import os
 
 
