@@ -10,7 +10,7 @@ MetaMap is a NLP (Natural Language Processing) developed by NLM (National Librar
 
 ### MetaMaPY
 
-Since MetaMap is a command line tool. We wrapped it with Python and Flask to build a REST API. To improve its performance, we used parallel programming to allow MetaMap running on several cores simultaneously so that we can get the most out of the computer power of the server. Additionally, we implemented a MRU (Most Recently Used) cache that stores the most recently used queries to boost the response time.
+Since MetaMap is a command line tool, we wrapped it with Python and Flask to build a REST API. To improve its performance, we used parallel programming to allow MetaMap running on several cores simultaneously so that we can get the most out of the computer power of the server. Additionally, we implemented a MRU (Most Recently Used) cache that stores the most recently used queries to boost the response time.
 
 One can specify the number of paralleling processes using environment variable `MAX_PROCESSES`. Usually using the number of cores in CPU would give you best performance. If the CPU has hyperthreading feature, 2 times of cores may result in the best performance.
  
