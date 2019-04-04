@@ -185,5 +185,5 @@ class MetaMaPY:
         logger.info(f'metamap time: {metamap_time - pre_parse}')
         logger.info(f'result parse time: {post_parse - metamap_time}')
         logger.info(f'total time: {post_parse - start_time}')
-        logger.info(f'{len(terms)} terms found')
+        logger.info(f'{len(terms)} terms found for {len(articles)} articles.')
         return terms
