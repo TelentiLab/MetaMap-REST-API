@@ -122,10 +122,14 @@ def _fetch_pubmed(web_env: str, query_key: str) -> List:
                 continue
 
             title: Element = article.find('ArticleTitle')
+            print(pubmed_id)
+            print(title.text)
             paragraph_list = []
             for paragraph in article.findall('./Abstract/AbstractText'):
                 p_count += 1
-                paragraph_list.append(paragraph.text)
+                paragraph_text = "".join(paragraph.itertext())  # AbstractText may have additional nested xml
+                if paragraph_text:
+                    paragraph_list.append(paragraph_text)
 
             abstract = ' '.join(paragraph_list)  # concatenate
 
