@@ -37,14 +37,14 @@ def get_omim(rsid: str) -> Union[None, Dict]:
                 allelic_variants = res_json['omim']['searchResponse']['entryList'][0]['entry']['allelicVariantList']
                 for each in allelic_variants:
                     variant = each['allelicVariant']
-                    if rsid == variant['dbSnps']:
+                    if rsid == variant.get('dbSnps'):
                         return {
                             'source': 'omim',
                             'id': f'{variant["mimNumber"]}#{variant["number"]:04d}',  # format to be 4 digits (e.g 0001)
                             'text': variant['text'],
                         }
-            except IndexError or KeyError:
-                logger.debug('OMIM no result.')
+            except (IndexError, KeyError) as e:
+                logger.debug(f'OMIM no result. {e}')
         else:
             logger.debug('OMIM request failed.')
             logger.debug(res.text)
