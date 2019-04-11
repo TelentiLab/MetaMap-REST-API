@@ -21,8 +21,8 @@ def after_request(response):
     return response
 
 
-api.add_resource(Article, '/metamap/articles')
-api.add_resource(Term, '/metamap/term/<string:term>')
+api.add_resource(Article, '/articles')
+api.add_resource(Term, '/term/<string:term>')
 
 if __name__ == '__main__':
     app.run(debug=True)
