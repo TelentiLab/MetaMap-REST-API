@@ -65,7 +65,7 @@ This command will spawn a shell within the virtualenv, and you can run the app w
 To exit the shell, use command:
 
 ```
-deactivate
+exit
 ```  
 
 ### Running on server
