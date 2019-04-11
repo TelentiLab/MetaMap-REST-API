@@ -16,7 +16,27 @@ One can specify the number of paralleling processes using environment variable `
  
 ## Usage
 
-This section explains how to run the API [locally](#running-locally) and on [remote servers](#running-on-server).
+### Installation
+
+Before running this project, you will need to set up the environment. You will need **Python 3.7** for this project. You will also need **pipenv** installed, which is now the preferred way to manage Python virtual environment.
+
+To install **pipenv**, use the command:
+
+```
+pip install pipenv
+``` 
+
+After this point, all the project dependencies is managed in virtual environment, and it will leave your global Python settings intact.
+
+To set up this project with virtual environment, navigate the to project folder and run:
+
+```
+pipenv install
+```
+
+It will check the **Pipfile.lock** file and create an exact copy of the virtual environment. After finishing setting up, we can proceed to run this app.
+
+The following sections explains how to run the API [locally](#running-locally) and on [remote servers](#running-on-server).
 
 ### Running Locally
 
@@ -28,11 +48,33 @@ Notice that you will need a valid OMIM API key to query OMIM data, which can be 
 
 And you may need an optional PubMed API key if you wish to have higher rate. The default rate limit is 3 requests per second without an API key. See [E-Utilities reference page](https://www.ncbi.nlm.nih.gov/books/NBK25497/) for more info.
 
+To run the app within the virtual environment, use the command:
+
+```
+pipenv run python app.py
+```
+
+The `pipenv run` command will execute the following command in the virtual environment. Another common practice is to use
+
+```
+pipenv shell
+```
+
+This command will spawn a shell within the virtualenv, and you can run the app with command `python app.py` in the shell. You will notice the name of the virtual environment prefixed to your command line now. This confirms that you are in the virtual environment.
+
+To exit the shell, use command:
+
+```
+deactivate
+```  
+
 ### Running on server
 
 It is recommended to deploy the API onto a server with Nginx and uWSGI. Sample configuration files for uWSGI have been provided. We do not cover the details of using Nginx and uWSGI, but here is a tutorial that can be helpful: [How To Deploy Python App Using uWSGI And Nginx](https://github.com/CristianoYL/Tutorials/blob/master/How%20To%20Deploy%20Python%20App%20Using%20uWSGI%20And%20Nginx.md).
 
 When deploying on server, it is recommended to configure the environment variables in the uWSGI `.service` file, which has been demonstrated in the example file [`uwsgi_metamapy.service.example`](uwsgi_metamapy.service.example).
+
+Before deploying the app, you will need to set up the virtual environment with **pipenv** the same way as you would locally. However, you do not need to run the app manually anymore. **uWSGI** will run it for you. 
 
 ## API Specifications
 
