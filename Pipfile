@@ -10,6 +10,8 @@ flask = "*"
 flask-restful = "*"
 python-dotenv = "*"
 uwsgi = "*"
+requests = "*"
+flask-limiter = "*"
 
 [requires]
 python_version = "3.7"
